@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ABC POS — Owner Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#141B2D; --teal:#0E7C6B; --amber:#F2A93B; --paper:#F6F4EF;
+  --line:#E6E1D5; --grey:#8A93AC; --card:#FFFFFF;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sora',system-ui,sans-serif; background:var(--paper); color:var(--ink); line-height:1.6}
+a{color:inherit}
+
+/* top bar */
+.bar{background:var(--ink); color:#fff; padding:12px 20px; display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.mark{font-weight:800; font-size:16px; letter-spacing:-.01em}
+.mark span{color:var(--amber)}
+.bar .ctx{font-size:12px; color:var(--grey)}
+.bar .sp{flex:1}
+.pill{
+  font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.12em;
+  background:rgba(242,169,59,.16); color:var(--amber); border:1px solid rgba(242,169,59,.4);
+  padding:4px 9px; border-radius:20px;
+}
+.back{font-size:12px; color:var(--grey); text-decoration:none}
+.back:hover{color:#fff}
+
+.wrap{max-width:1020px; margin:0 auto; padding:20px 16px 56px}
+
+/* filters */
+.filters{display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-bottom:18px}
+.field{display:flex; flex-direction:column; gap:4px}
+.field label{font-size:10.5px; font-weight:700; letter-spacing:.1em; color:var(--grey); text-transform:uppercase}
+select,input[type=date]{
+  font-family:'Sora',sans-serif; font-size:13.5px; color:var(--ink); background:var(--card);
+  border:1.5px solid var(--line); border-radius:10px; padding:9px 11px;
+}
+select:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid var(--amber); outline-offset:1px}
+
+/* KPI row */
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:12px}
+.kpi{background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:15px}
+.kpi .l{font-size:10.5px; font-weight:700; letter-spacing:.1em; color:var(--grey); text-transform:uppercase}
+.kpi .v{font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:600; margin-top:5px; letter-spacing:-.02em}
+.kpi .d{font-size:11.5px; color:var(--grey); margin-top:1px}
+
+.panel{background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:16px 18px; margin-top:14px}
+.panel h2{font-size:14px; font-weight:700; display:flex; align-items:center; gap:9px}
+.legend{display:flex; gap:12px; margin-left:auto; font-size:11px; color:var(--grey); font-weight:400}
+.legend i{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:4px; vertical-align:-1px}
+
+/* chart */
+.chartbox{margin-top:12px; overflow-x:auto}
+svg{display:block}
+.gl{stroke:var(--line); stroke-width:1}
+.ax{font-family:'IBM Plex Mono',monospace; font-size:9px; fill:var(--grey)}
+.bar-c{fill:var(--teal)} .bar-k{fill:var(--amber)}
+.bar-g:hover rect{opacity:.78}
+
+/* tables */
+table{width:100%; border-collapse:collapse; margin-top:8px}
+th{
+  text-align:left; font-size:10px; font-weight:700; letter-spacing:.1em; color:var(--grey);
+  text-transform:uppercase; padding:7px 8px; border-bottom:1.5px solid var(--line);
+}
+td{padding:9px 8px; border-bottom:1px dashed var(--line); font-size:13px}
+tr:last-child td{border-bottom:none}
+.num{text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12.5px}
+.barcell{padding:9px 8px}
+.minibar{height:6px; border-radius:3px; background:var(--amber)}
+tfoot td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700; padding-top:10px}
+.acct{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--grey)}
+
+.balanced{
+  display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700;
+  color:var(--teal); background:rgba(14,124,107,.1); padding:4px 10px; border-radius:20px;
+  margin-left:auto;
+}
+.hint{font-size:12px; color:var(--grey); margin-top:10px}
+@media(max-width:560px){ .bar .ctx{display:none} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <span class="mark">ABC<span> POS</span></span>
+  <span class="ctx">Owner dashboard · Al Noor Restaurant</span>
+  <span class="sp"></span>
+  <span class="pill">DEMO DATA</span>
+  <a class="back" href="../">← Demo menu</a>
+</div>
+
+<div class="wrap">
+
+  <div class="filters">
+    <div class="field"><label for="from">From</label><input type="date" id="from"></div>
+    <div class="field"><label for="to">To</label><input type="date" id="to"></div>
+    <div class="field">
+      <label for="outlet">Outlet</label>
+      <select id="outlet">
+        <option value="">All outlets</option>
+        <option value="MAIN">Main — Al Muntasir Rd</option>
+        <option value="BR2">Branch 2 — Al Nakheel</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section class="panel">
+    <h2>Daily sales
+      <span class="legend">
+        <span><i style="background:var(--teal)"></i>Cash</span>
+        <span><i style="background:var(--amber)"></i>Card</span>
+      </span>
+    </h2>
+    <div class="chartbox" id="chart"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Top items</h2>
+    <table>
+      <thead><tr><th>Item</th><th></th><th class="num">Qty</th><th class="num">Value</th></tr></thead>
+      <tbody id="topBody"></tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h2>Trial balance <span class="balanced" id="balchip">✓ In balance</span></h2>
+    <table>
+      <thead><tr><th>Account</th><th>Type</th><th class="num">Debit</th><th class="num">Credit</th></tr></thead>
+      <tbody id="tbBody"></tbody>
+      <tfoot id="tbFoot"></tfoot>
+    </table>
+    <p class="hint">Every sale posts here automatically — sales to revenue, VAT to VAT&nbsp;Payable, cost of goods against inventory. Nobody types a journal entry.</p>
+  </section>
+
+</div>
+
+<script>
+/* =====================================================================
+   CONFIG — flip to live when the API is deployed (Track B)
+   MODE 'demo'  → uses the seeded data below, no network calls
+   MODE 'live'  → calls API_BASE with a bearer token from sign-in
+   ===================================================================== */
+const CONFIG = {
+  MODE: 'demo',
+  API_BASE: 'https://api.bytecraft.live'
+};
+
+/* ---------------------------------------------------------------------
+   Seed: 14 trading days. Everything else on this page is DERIVED from
+   this array, so the KPIs, chart and trial balance can never disagree
+   with each other.
+   --------------------------------------------------------------------- */
+const DAYS = [
+  { date:'2026-07-12', cash:1680, card: 980, orders: 61 },
+  { date:'2026-07-13', cash:1420, card: 860, orders: 54 },
+  { date:'2026-07-14', cash:1510, card: 910, orders: 57 },
+  { date:'2026-07-15', cash:1640, card:1020, orders: 62 },
+  { date:'2026-07-16', cash:2180, card:1360, orders: 79 },
+  { date:'2026-07-17', cash:3120, card:2040, orders:112 },
+  { date:'2026-07-18', cash:2960, card:1880, orders:106 },
+  { date:'2026-07-19', cash:1720, card:1010, orders: 63 },
+  { date:'2026-07-20', cash:1380, card: 840, orders: 52 },
+  { date:'2026-07-21', cash:1560, card: 950, orders: 59 },
+  { date:'2026-07-22', cash:1700, card:1080, orders: 64 },
+  { date:'2026-07-23', cash:2240, card:1420, orders: 82 },
+  { date:'2026-07-24', cash:3260, card:2120, orders:118 },
+  { date:'2026-07-25', cash:3040, card:1960, orders:110 },
+];
+
+const TOP_ITEMS = [
+  { name:'Karak Chai',          qty:941, value:3764 },
+  { name:'Chicken Tikka',       qty:312, value:9984 },
+  { name:'Butter Naan',         qty:288, value:1440 },
+  { name:'Mixed Grill Platter', qty:187, value:12716 },
+  { name:'Butter Chicken',      qty:164, value:5904 },
+];
+
+const VAT_RATE = 0.05;
+const DISCOUNT_SHARE = 0.012;  // ~1.2% of net sales given away in discounts
+const COGS_SHARE     = 0.40;   // food cost as a share of net sales
+
+const aed = n => 'AED ' + n.toLocaleString('en-AE',{minimumFractionDigits:2,maximumFractionDigits:2});
+const aed0 = n => 'AED ' + Math.round(n).toLocaleString('en-AE');
+const $ = id => document.getElementById(id);
+
+function totals(days){
+  const cash = days.reduce((a,d)=>a+d.cash,0);
+  const card = days.reduce((a,d)=>a+d.card,0);
+  const orders = days.reduce((a,d)=>a+d.orders,0);
+  const gross = cash + card;                 // collected, VAT inclusive
+  const vat   = gross - gross/(1+VAT_RATE);  // VAT element
+  const net   = gross - vat;                 // net sales after discount
+  const disc  = net * DISCOUNT_SHARE;
+  const rev   = net + disc;                  // gross revenue before discount
+  const cogs  = net * COGS_SHARE;
+  return { cash, card, orders, gross, vat, net, disc, rev, cogs };
+}
+
+function renderKpis(t){
+  const avg = t.orders ? t.gross / t.orders : 0;
+  const cardPct = t.gross ? Math.round(t.card / t.gross * 100) : 0;
+  $('kpis').innerHTML = [
+    ['Gross sales',   aed0(t.gross), DAYS.length + ' trading days'],
+    ['Orders',        t.orders.toLocaleString('en-AE'), 'Avg ' + aed(avg) + ' per order'],
+    ['VAT collected', aed0(t.vat),   'Due to FTA on filing'],
+    ['Cash / card',   (100-cardPct) + '% / ' + cardPct + '%', aed0(t.cash) + ' in drawer'],
+  ].map(([l,v,d]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join('');
+}
+
+/* Hand-drawn SVG so the chart works with no CDN and no build step. */
+function renderChart(days){
+  const W=940, H=210, padL=52, padR=8, padB=30, padT=10;
+  const max = Math.max(...days.map(d=>d.cash+d.card));
+  const step = Math.ceil(max/4/500)*500;             // tidy gridline steps
+  const top  = step*4;
+  const plotW = W-padL-padR, plotH = H-padT-padB;
+  const bw = plotW/days.length;
+  const y = v => padT + plotH - (v/top)*plotH;
+
+  let g = '';
+  for(let i=0;i<=4;i++){
+    const v = step*i, yy = y(v);
+    g += `<line class="gl" x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}"/>
+          <text class="ax" x="${padL-8}" y="${yy+3}" text-anchor="end">${v/1000}k</text>`;
+  }
+
+  let bars = '';
+  days.forEach((d,i)=>{
+    const x = padL + i*bw + bw*0.22, w = bw*0.56;
+    const hc = (d.cash/top)*plotH, hk = (d.card/top)*plotH;
+    const label = new Date(d.date).toLocaleDateString('en-AE',{day:'numeric',month:'short'});
+    bars += `<g class="bar-g">
+      <title>${label} — cash ${aed(d.cash)}, card ${aed(d.card)}, ${d.orders} orders</title>
+      <rect class="bar-c" x="${x}" y="${y(d.cash)}" width="${w}" height="${hc}" rx="2"/>
+      <rect class="bar-k" x="${x}" y="${y(d.cash+d.card)}" width="${w}" height="${hk}" rx="2"/>
+      <text class="ax" x="${x+w/2}" y="${H-10}" text-anchor="middle">${label.split(' ')[0]}</text>
+    </g>`;
+  });
+
+  $('chart').innerHTML =
+    `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img"
+       aria-label="Stacked bar chart of daily cash and card sales across ${days.length} days">
+       ${g}${bars}
+     </svg>`;
+}
+
+function renderTop(items){
+  const max = Math.max(...items.map(i=>i.qty));
+  $('topBody').innerHTML = items.map(i=>`
+    <tr>
+      <td>${i.name}</td>
+      <td class="barcell" style="width:34%">
+        <div class="minibar" style="width:${Math.round(i.qty/max*100)}%"></div>
+      </td>
+      <td class="num">${i.qty.toLocaleString('en-AE')}</td>
+      <td class="num">${aed(i.value)}</td>
+    </tr>`).join('');
+}
+
+/* Trial balance derived from the same totals, so debits always equal credits. */
+function renderTrialBalance(t){
+  const rows = [
+    ['1001','Cash in Drawer',     'Asset',     t.cash, 0],
+    ['1002','Card Clearing',      'Asset',     t.card, 0],
+    ['1200','Inventory',          'Asset',     0,      t.cogs],
+    ['2101','VAT Payable',        'Liability', 0,      t.vat],
+    ['4001','Sales Revenue',      'Revenue',   0,      t.rev],
+    ['4101','Sales Discounts',    'Revenue',   t.disc, 0],
+    ['5001','Cost of Goods Sold', 'Expense',   t.cogs, 0],
+  ];
+  $('tbBody').innerHTML = rows.map(([c,n,ty,dr,cr])=>`
+    <tr>
+      <td><span class="acct">${c}</span> &nbsp;${n}</td>
+      <td style="color:var(--grey);font-size:12px">${ty}</td>
+      <td class="num">${dr ? aed(dr) : '—'}</td>
+      <td class="num">${cr ? aed(cr) : '—'}</td>
+    </tr>`).join('');
+
+  const dr = rows.reduce((a,r)=>a+r[3],0), cr = rows.reduce((a,r)=>a+r[4],0);
+  $('tbFoot').innerHTML =
+    `<tr><td colspan="2">Total</td><td class="num">${aed(dr)}</td><td class="num">${aed(cr)}</td></tr>`;
+
+  const ok = Math.abs(dr-cr) < 0.01;
+  $('balchip').textContent = ok ? '✓ In balance' : '⚠ Out by ' + aed(Math.abs(dr-cr));
+  $('balchip').style.color = ok ? 'var(--teal)' : '#D4483B';
+  $('balchip').style.background = ok ? 'rgba(14,124,107,.1)' : 'rgba(212,72,59,.12)';
+}
+
+/* Date filter actually filters the seed — the demo responds to input. */
+function draw(){
+  const from = $('from').value, to = $('to').value;
+  const days = DAYS.filter(d => (!from || d.date >= from) && (!to || d.date <= to));
+  const use = days.length ? days : DAYS;
+  const t = totals(use);
+  renderKpis(t); renderChart(use); renderTop(TOP_ITEMS); renderTrialBalance(t);
+}
+
+$('from').value = DAYS[0].date;
+$('to').value   = DAYS[DAYS.length-1].date;
+['from','to','outlet'].forEach(id => $(id).addEventListener('change', draw));
+draw();
+</script>
+</body>
+</html>

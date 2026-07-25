@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABC POS — The Till</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;700&display=swap');
+:root{
+  --ink:#141B2D; --teal:#0E7C6B; --amber:#F2A93B; --paper:#F6F4EF; --danger:#D4483B;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Sora',sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:#22293D;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 12px;gap:14px}
+.caption{color:#8A93AC;font-size:12px;font-weight:600;letter-spacing:.06em}
+
+/* Tablet frame */
+.tablet{width:min(960px,96vw);aspect-ratio:16/10;background:#000;border-radius:26px;padding:12px;box-shadow:0 30px 80px rgba(0,0,0,.5);position:relative}
+.screen{width:100%;height:100%;background:var(--paper);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;position:relative}
+
+/* App bar */
+.appbar{background:var(--ink);color:#fff;display:flex;align-items:center;padding:0 14px;height:52px;gap:10px;flex-shrink:0}
+.brand{font-weight:800;font-size:16px}.brand span{color:var(--amber)}
+.appbar .spacer{flex:1}
+.spin{width:15px;height:15px;border:2px solid rgba(242,169,59,.3);border-top-color:var(--amber);border-radius:50%;animation:sp 1s linear infinite;display:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.icbtn{position:relative;background:none;border:none;color:#fff;font-size:19px;cursor:pointer;padding:6px}
+.badge{position:absolute;top:0;right:-2px;background:var(--amber);color:var(--ink);font-size:9px;font-weight:800;border-radius:9px;padding:1px 5px;display:none}
+.chip-online{display:flex;align-items:center;gap:6px;border:none;cursor:pointer;color:#fff;font-weight:800;font-size:10.5px;padding:7px 13px;border-radius:20px;background:var(--teal)}
+.chip-online.off{background:var(--danger)}
+.chip-online i{width:7px;height:7px;border-radius:50%;background:#fff;display:block}
+
+/* Body split */
+.body{flex:1;display:flex;min-height:0}
+.menu{flex:1;display:flex;flex-direction:column;min-width:0}
+.cats{display:flex;gap:8px;padding:10px;overflow-x:auto;flex-shrink:0}
+.cat{border:none;background:#fff;color:var(--ink);font-weight:700;font-size:12px;padding:8px 15px;border-radius:18px;cursor:pointer;white-space:nowrap;box-shadow:0 1px 2px rgba(20,27,45,.06)}
+.cat.sel{background:var(--ink);color:#fff}
+.grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;padding:0 10px 10px}
+.tile{background:#fff;border:none;border-radius:13px;padding:11px;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;min-height:74px;box-shadow:0 1px 2px rgba(20,27,45,.06);transition:transform .08s}
+.tile:active{transform:scale(.95)}
+.tile .n{font-size:12px;font-weight:600;color:var(--ink);line-height:1.3}
+.tile .p{font-weight:800;color:var(--teal);font-size:12.5px;margin-top:6px}
+
+/* Cart pane */
+.cart{width:320px;background:#fff;margin:10px;border-radius:16px;padding:11px;display:flex;flex-direction:column;flex-shrink:0}
+.segs{display:flex;gap:5px}
+.seg{flex:1;border:none;background:var(--paper);color:var(--ink);font-weight:800;font-size:10px;padding:8px 0;border-radius:9px;cursor:pointer}
+.seg.sel{background:var(--teal);color:#fff}
+.tables{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.tbl{border:none;background:var(--paper);color:var(--ink);font-weight:700;font-size:11px;padding:5px 11px;border-radius:7px;cursor:pointer}
+.tbl.sel{background:var(--amber)}
+.lines{flex:1;overflow-y:auto;margin-top:7px;min-height:40px}
+.empty{color:#9AA3B8;font-size:12px;text-align:center;padding:26px 0}
+.line{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px dashed #EAE6DA}
+.line .n{flex:1;font-size:12px;font-weight:600;color:var(--ink)}
+.q{width:26px;height:26px;border:none;border-radius:7px;font-weight:800;cursor:pointer;font-size:14px}
+.q.m{background:var(--paper);color:var(--ink)}.q.p{background:var(--teal);color:#fff}
+.qty{width:22px;text-align:center;font-weight:800;font-size:12.5px}
+.tots{border-top:1.5px solid #EAE6DA;margin-top:6px;padding-top:6px;font-size:12px;color:var(--ink)}
+.trow{display:flex;justify-content:space-between;padding:1.5px 0;align-items:center}
+.trow.big{font-size:16.5px;font-weight:800}.trow.big .v{color:var(--teal)}
+input[type=range]{width:86px;accent-color:var(--amber)}
+.charge{margin-top:8px;border:none;background:var(--teal);color:#fff;font-weight:800;font-size:14px;padding:13px;border-radius:12px;cursor:pointer}
+.charge:disabled{background:#B9C0CF}
+
+/* Overlays inside screen */
+.overlay{position:absolute;inset:0;background:rgba(20,27,45,.55);display:none;align-items:center;justify-content:center;z-index:10}
+.overlay.open{display:flex}
+.dialog{background:#fff;border-radius:18px;padding:18px;width:300px}
+.dialog h3{font-size:15px;font-weight:800;color:var(--ink)}
+.bigamt{font-size:26px;font-weight:800;color:var(--teal);margin:4px 0 10px}
+.payin{width:100%;border:none;background:var(--paper);border-radius:11px;padding:11px;font-size:16px;font-weight:700;margin-top:10px;color:var(--ink)}
+.quick{display:flex;gap:5px;margin-top:7px}
+.qk{flex:1;border:1.5px solid #E3DED2;background:#fff;border-radius:9px;padding:7px 0;font-weight:700;color:var(--ink);cursor:pointer;font-size:12px}
+.chg{color:var(--teal);font-weight:700;font-size:12.5px;margin-top:7px;display:none}
+.dactions{display:flex;gap:7px;margin-top:13px}
+.btn{flex:1;border:none;border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-size:12.5px}
+.btn.ghost{background:var(--paper);color:var(--ink)}
+.btn.go{background:var(--teal);color:#fff}
+.btn.go:disabled{opacity:.4}
+.btn.amber{background:var(--amber);color:var(--ink)}
+
+/* Receipt */
+.rwrap{display:flex;flex-direction:column;align-items:center;gap:10px;max-height:92%;overflow-y:auto;padding:6px}
+.receipt{width:236px;background:#fff;padding:14px 12px 18px;font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.5;color:#000;box-shadow:0 10px 26px rgba(0,0,0,.3);clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),95% 100%,90% calc(100% - 6px),85% 100%,80% calc(100% - 6px),75% 100%,70% calc(100% - 6px),65% 100%,60% calc(100% - 6px),55% 100%,50% calc(100% - 6px),45% 100%,40% calc(100% - 6px),35% 100%,30% calc(100% - 6px),25% 100%,20% calc(100% - 6px),15% 100%,10% calc(100% - 6px),5% 100%,0 calc(100% - 6px))}
+.receipt .c{text-align:center}.receipt .b{font-weight:700;font-size:12px}
+.receipt .r{display:flex;justify-content:space-between}
+.receipt .qr{width:50px;height:50px;margin:7px auto;border:4px solid #000;background:repeating-conic-gradient(#000 0% 25%,#fff 0% 50%);background-size:8px 8px}
+
+/* Orders bottom sheet */
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:18px 18px 0 0;padding:14px;max-height:70%;overflow-y:auto;transform:translateY(105%);transition:transform .28s;z-index:9}
+.sheet.open{transform:translateY(0)}
+.sheet h3{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:8px}
+.ocard{background:#fff;border-radius:11px;padding:9px 11px;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.ocard .no{font-weight:800;font-size:12px;color:var(--ink)}
+.ocard .meta{font-size:10.5px;color:#8A93AC;flex:1}
+.ocard .amt{font-weight:800;font-size:12px;color:var(--ink)}
+.st{font-size:9px;font-weight:800;padding:3px 8px;border-radius:12px}
+.st.s{background:#E3F2EE;color:var(--teal)}.st.p{background:#FDF0DC;color:#B27716}
+.snack{position:absolute;bottom:14px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--ink);color:#fff;font-size:11.5px;font-weight:600;padding:10px 16px;border-radius:10px;transition:transform .25s;z-index:20;white-space:nowrap}
+.snack.show{transform:translateX(-50%) translateY(0)}
+@media(max-width:760px){.cart{width:250px}.tablet{aspect-ratio:auto;height:88vh}}
+</style>
+</head>
+<body>
+<div class="caption">THE TILL — INTERACTIVE DEMO · TABLET VIEW</div>
+<div class="tablet"><div class="screen">
+
+  <div class="appbar">
+    <div class="brand">ABC<span> POS</span></div>
+    <div class="spacer"></div>
+    <div class="spin" id="spin"></div>
+    <button class="icbtn" onclick="openSheet()" title="Today's orders">🧾<span class="badge" id="badge">0</span></button>
+    <button class="chip-online" id="onchip" onclick="toggleOnline()"><i></i><span id="ontxt">ONLINE</span></button>
+  </div>
+
+  <div class="body">
+    <div class="menu">
+      <div class="cats" id="cats"></div>
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="cart">
+      <div class="segs" id="segs"></div>
+      <div class="tables" id="tables"></div>
+      <div class="lines" id="lines"><div class="empty">Tap menu items to start an order</div></div>
+      <div class="tots">
+        <div class="trow"><span>Subtotal</span><span id="sub">AED 0.00</span></div>
+        <div class="trow"><span>Discount</span><span style="display:flex;align-items:center;gap:6px"><input type="range" id="disc" min="0" max="50" step="5" value="0" oninput="render()"><b id="discl">0%</b></span></div>
+        <div class="trow"><span>VAT 5%</span><span id="vat">AED 0.00</span></div>
+        <div class="trow big"><span>Total</span><span class="v" id="tot">AED 0.00</span></div>
+      </div>
+      <button class="charge" id="chargeBtn" disabled onclick="openPay()">Charge AED 0.00</button>
+    </div>
+  </div>
+
+  <!-- Pay dialog -->
+  <div class="overlay" id="payOv">
+    <div class="dialog">
+      <h3>Take payment</h3>
+      <div class="bigamt" id="payAmt">AED 0.00</div>
+      <div class="segs" id="paySegs"></div>
+      <div id="cashArea">
+        <input class="payin" id="tender" type="number" placeholder="Amount received" oninput="payRender()">
+        <div class="quick" id="quick"></div>
+        <div class="chg" id="chg"></div>
+      </div>
+      <div class="dactions">
+        <button class="btn ghost" onclick="closePay()">Cancel</button>
+        <button class="btn go" id="doPay" disabled onclick="complete()">Complete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Receipt dialog -->
+  <div class="overlay" id="rcOv">
+    <div class="rwrap">
+      <div class="receipt" id="rc"></div>
+      <div class="dactions" style="width:236px">
+        <button class="btn ghost" onclick="document.getElementById('rcOv').classList.remove('open')">Close</button>
+        <button class="btn amber" onclick="printRc()">🖨 Print</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders sheet -->
+  <div class="sheet" id="sheet">
+    <h3>Today's orders</h3>
+    <div id="olist"><div class="empty">No orders yet</div></div>
+  </div>
+
+  <div class="snack" id="snack"></div>
+</div></div>
+<div class="caption">TAP THE ONLINE CHIP TO SIMULATE INTERNET LOSS · ORDERS QUEUE &amp; SYNC ON RECONNECT</div>
+<div style="margin-top:6px"><a href="../" style="color:#F2A93B;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.04em">← Back to demo menu</a></div>
+
+<script>
+const MENU={Starters:[["Chicken Samosa (4pc)",12],["Veg Pakora",10],["Hummus & Bread",14],["Dynamite Shrimp",28]],
+Grills:[["Chicken Tikka",32],["Seekh Kebab",30],["Mixed Grill Platter",68],["Lamb Chops",58]],
+Curries:[["Butter Chicken",36],["Karahi Chicken (Half)",42],["Daal Makhani",24],["Palak Paneer",26]],
+Breads:[["Butter Naan",5],["Garlic Naan",6],["Tandoori Roti",3]],
+Beverages:[["Karak Chai",4],["Fresh Lime Mint",12],["Mango Lassi",14],["Water 500ml",2]]};
+const TABLES=["T1","T2","T3","T4","T5","T6","T7","T8"];
+let cat="Starters",cart=[],otype="DINE-IN",table="T1",online=true,orders=[],payMethod="CASH",seq=0;
+
+const $=id=>document.getElementById(id);
+const fmt=n=>"AED "+n.toFixed(2);
+
+function calc(){const sub=cart.reduce((a,l)=>a+l[1]*l[2],0);const d=sub*(+$("disc").value)/100;const vat=(sub-d)*.05;return{sub,d,vat,tot:sub-d+vat}}
+
+function render(){
+  $("cats").innerHTML=Object.keys(MENU).map(c=>`<button class="cat ${c===cat?'sel':''}" onclick="cat='${c}';render()">${c}</button>`).join("");
+  $("grid").innerHTML=MENU[cat].map((it,i)=>`<button class="tile" onclick="add('${cat}',${i})"><div class="n">${it[0]}</div><div class="p">${fmt(it[1])}</div></button>`).join("");
+  $("segs").innerHTML=["DINE-IN","TAKEAWAY","DELIVERY"].map(t=>`<button class="seg ${t===otype?'sel':''}" onclick="otype='${t}';render()">${t}</button>`).join("");
+  $("tables").style.display=otype==="DINE-IN"?"flex":"none";
+  $("tables").innerHTML=TABLES.map(t=>`<button class="tbl ${t===table?'sel':''}" onclick="table='${t}';render()">${t}</button>`).join("");
+  $("lines").innerHTML=cart.length?cart.map((l,i)=>`<div class="line"><div class="n">${l[0]}</div><button class="q m" onclick="qty(${i},-1)">−</button><div class="qty">${l[2]}</div><button class="q p" onclick="qty(${i},1)">+</button></div>`).join(""):'<div class="empty">Tap menu items to start an order</div>';
+  const c=calc();
+  $("sub").textContent=fmt(c.sub);$("vat").textContent=fmt(c.vat);$("tot").textContent=fmt(c.tot);
+  $("discl").textContent=$("disc").value+"%";
+  $("chargeBtn").disabled=!cart.length;
+  $("chargeBtn").textContent="Charge "+fmt(c.tot);
+  const p=orders.filter(o=>o.st==="PENDING").length;
+  $("badge").style.display=p?"block":"none";$("badge").textContent=p;
+}
+function add(c,i){const it=MENU[c][i];const f=cart.find(l=>l[0]===it[0]);f?f[2]++:cart.push([it[0],it[1],1]);render()}
+function qty(i,d){cart[i][2]+=d;if(cart[i][2]<=0)cart.splice(i,1);render()}
+
+function toggleOnline(){
+  online=!online;
+  $("onchip").classList.toggle("off",!online);
+  $("ontxt").textContent=online?"ONLINE":"OFFLINE";
+  if(online)drain();
+}
+function drain(){
+  const pend=orders.filter(o=>o.st==="PENDING");
+  if(!pend.length)return;
+  $("spin").style.display="block";
+  let i=0;
+  const t=setInterval(()=>{
+    if(i>=pend.length||!online){clearInterval(t);$("spin").style.display="none";if(i)snack(i+" order(s) synced to server");render();renderSheet();return}
+    pend[i].st="SYNCED";i++;render();renderSheet();
+  },600);
+}
+
+function openPay(){payMethod="CASH";$("tender").value="";$("payOv").classList.add("open");payRender()}
+function closePay(){$("payOv").classList.remove("open")}
+function payRender(){
+  const c=calc();
+  $("payAmt").textContent=fmt(c.tot);
+  $("paySegs").innerHTML=["CASH","CARD"].map(m=>`<button class="seg ${m===payMethod?'sel':''}" onclick="payMethod='${m}';payRender()">${m}</button>`).join("");
+  $("cashArea").style.display=payMethod==="CASH"?"block":"none";
+  const qs=[...new Set([Math.ceil(c.tot/10)*10,Math.ceil(c.tot/50)*50,Math.ceil(c.tot/100)*100])];
+  $("quick").innerHTML=qs.map(v=>`<button class="qk" onclick="$('tender').value=${v};payRender()">${v}</button>`).join("");
+  const t=+$("tender").value||0;
+  $("chg").style.display=(payMethod==="CASH"&&t>=c.tot)?"block":"none";
+  $("chg").textContent="Change due: "+fmt(Math.max(0,t-c.tot));
+  $("doPay").disabled=payMethod==="CASH"&&t<c.tot;
+}
+function complete(){
+  const c=calc(),t=payMethod==="CASH"?+$("tender").value:c.tot;
+  const o={no:String(++seq).padStart(4,"0"),type:otype,table:otype==="DINE-IN"?table:null,
+    items:cart.map(l=>({n:l[0],p:l[1],q:l[2]})),...c,pm:payMethod,tn:t,ch:Math.max(0,t-c.tot),
+    st:online?"SYNCED":"PENDING",time:new Date().toLocaleTimeString()};
+  orders.unshift(o);cart=[];$("disc").value=0;closePay();render();renderSheet();showRc(o);
+  if(!online)snack("Saved locally — will sync when back online");
+}
+function showRc(o){
+  $("rc").innerHTML=`<div class="c b">AL NOOR RESTAURANT</div><div class="c">Grills · Curries · Karak</div>
+  <div class="c">Al Muntasir Rd, Ras Al Khaimah</div><div class="c">TRN: 100234567800003</div>
+  ----------------------------------
+  <div class="r"><span>#MAIN-${o.no}</span><span>${o.type}${o.table?" "+o.table:""}</span></div>
+  <div>${o.time}</div>
+  ----------------------------------
+  ${o.items.map(i=>`<div class="r"><span>${i.q} x ${i.n}</span><span>${(i.q*i.p).toFixed(2)}</span></div>`).join("")}
+  ----------------------------------
+  <div class="r"><span>Subtotal</span><span>${o.sub.toFixed(2)}</span></div>
+  ${o.d>0?`<div class="r"><span>Discount</span><span>-${o.d.toFixed(2)}</span></div>`:""}
+  <div class="r"><span>VAT 5%</span><span>${o.vat.toFixed(2)}</span></div>
+  <div class="r b"><span>TOTAL</span><span>${o.tot.toFixed(2)}</span></div>
+  ----------------------------------
+  <div class="r"><span>${o.pm}</span><span>${o.tn.toFixed(2)}</span></div>
+  ${o.pm==="CASH"?`<div class="r"><span>Change</span><span>${o.ch.toFixed(2)}</span></div>`:""}
+  <div class="qr"></div>
+  <div class="c">Shukran! Please visit again.</div>
+  <div class="c" style="opacity:.55">Powered by ABC POS</div>`;
+  $("rcOv").classList.add("open");
+}
+function printRc(){$("rcOv").classList.remove("open");snack("ESC/POS bytes → thermal printer")}
+function openSheet(){renderSheet();$("sheet").classList.toggle("open")}
+function renderSheet(){
+  $("olist").innerHTML=orders.length?orders.map(o=>`<div class="ocard"><div class="no">#${o.no}</div>
+  <div class="meta">${o.type}${o.table?" · "+o.table:""} · ${o.pm} · ${o.time}</div>
+  <div class="amt">${fmt(o.tot)}</div><span class="st ${o.st==="SYNCED"?"s":"p"}">${o.st}</span></div>`).join("")
+  :'<div class="empty">No orders yet</div>';
+}
+let snackT;
+function snack(m){$("snack").textContent=m;$("snack").classList.add("show");clearTimeout(snackT);snackT=setTimeout(()=>$("snack").classList.remove("show"),2600)}
+document.addEventListener("click",e=>{if(e.target.id==="payOv")closePay()});
+render();
+</script>
+</body>
+</html>
