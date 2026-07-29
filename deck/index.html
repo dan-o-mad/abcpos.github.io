@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ABC POS — Product Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{--ink:#141B2D;--ink2:#1C2540;--edge:#2B3558;--teal:#0E7C6B;--amber:#F2A93B;--muted:#8A93AC}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sora',system-ui,sans-serif;background:var(--ink);color:#fff;line-height:1.6;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:56px 18px}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.2em;
+  color:var(--teal);font-weight:600;text-transform:uppercase;margin-bottom:13px}
+.mark{font-weight:800;font-size:29px;letter-spacing:-.02em}.mark span{color:var(--amber)}
+h1{font-size:23px;font-weight:700;margin-top:26px;letter-spacing:-.02em}
+.lede{color:var(--muted);font-size:14.5px;max-width:470px;margin-top:7px;text-align:center}
+.cards{display:grid;gap:12px;margin-top:32px;width:min(470px,100%)}
+a.card{display:flex;align-items:center;gap:15px;text-decoration:none;color:#fff;
+  background:var(--ink2);border:1px solid var(--edge);border-radius:15px;padding:18px 19px;
+  transition:border-color .16s ease,transform .16s ease}
+a.card:hover,a.card:focus-visible{border-color:var(--teal);transform:translateY(-2px);outline:none}
+a.card:focus-visible{box-shadow:0 0 0 3px rgba(242,169,59,.45)}
+.glyph{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.05em;
+  color:var(--amber);border:1px solid rgba(242,169,59,.4);border-radius:9px;padding:7px 10px;flex-shrink:0}
+.t{flex:1}.t b{display:block;font-size:15.5px;font-weight:700}
+.t span{font-size:12.5px;color:var(--muted)}
+.arrow{color:var(--teal);font-weight:700}
+.back{margin-top:36px;font-size:13px;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--amber)}
+.note{font-size:12px;color:var(--muted);margin-top:22px;max-width:470px;text-align:center;line-height:1.7}
+@media(prefers-reduced-motion:reduce){a.card{transition:none}}
+</style>
+</head>
+<body>
+  <p class="eyebrow">ByteCraft</p>
+  <div class="mark">ABC<span> POS</span></div>
+  <h1>Product guide</h1>
+  <p class="lede">An eight-page walkthrough: the till, payments and receipts, what happens when the internet drops, the owner dashboard, and how to get started.</p>
+
+  <div class="cards">
+    <a class="card" href="ABC_POS_Client_Demo.pdf">
+      <span class="glyph">PDF</span>
+      <span class="t"><b>English</b><span>8 pages · print or share</span></span>
+      <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+    </a>
+    <a class="card" href="urdu.html">
+      <span class="glyph">اردو</span>
+      <span class="t"><b>Urdu</b><span>Same guide, right to left</span></span>
+      <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+    </a>
+  </div>
+
+  <p class="note">To keep the Urdu guide as a PDF, open it and print to PDF from your browser.</p>
+  <a class="back" href="../"><i class="fa-solid fa-arrow-left"></i> &nbsp;Back to ABC POS</a>
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ABC POS — Sell through anything</title>
+<meta name="description" content="Point of sale and accounting for restaurants, marts and petrol stations in the UAE. Keeps selling when the internet drops. By ByteCraft.">
+<meta property="og:title" content="ABC POS — Sell through anything">
+<meta property="og:description" content="A till that keeps trading when the internet drops, and books that close themselves.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="assets/css/core.css">
+<style>
+/* ---------------- nav ---------------- */
+.nav{
+  position:fixed; top:0; left:0; right:0; z-index:50; display:flex; align-items:center;
+  gap:22px; padding:16px 30px; transition:background .3s, border-color .3s, padding .3s;
+  border-bottom:1px solid transparent;
+}
+.nav.is-stuck{background:rgba(20,27,45,.9); backdrop-filter:blur(14px); border-bottom-color:#2B3558; padding:11px 30px}
+.nav .wordmark{font-size:21px}
+.nav__links{display:flex; gap:26px; margin-left:auto; align-items:center}
+.nav__links a{font-size:14.5px; font-weight:500; color:#9AA3B8; transition:color .15s}
+.nav__links a:hover{color:var(--brass-hi)}
+@media(max-width:860px){.nav__links a:not(.btn){display:none} .nav{padding:14px 18px}}
+
+/* ---------------- hero ---------------- */
+.hero{
+  position:relative; background:var(--espresso); color:var(--cream);
+  padding:150px 30px 96px; overflow:hidden;
+}
+/* layered warmth: brass pool bottom-left, jade wash right */
+.hero::before{
+  content:''; position:absolute; inset:0;
+  background:
+    radial-gradient(120% 80% at 12% 108%, rgba(242,169,59,.26), transparent 62%),
+    radial-gradient(90% 70% at 96% 4%, rgba(14,124,107,.28), transparent 58%),
+    linear-gradient(#141B2D, #1A2238);
+}
+.hero__in{
+  position:relative; max-width:1180px; margin:0 auto; display:grid;
+  grid-template-columns:1.08fr .92fr; gap:60px; align-items:center;
+}
+.hero h1{margin:18px 0 20px; color:#FFFFFF}
+.hero h1 em{font-style:italic; color:var(--brass-hi); font-style:italic}
+.hero .lede{color:#9AA3B8; max-width:520px}
+.hero__cta{display:flex; gap:12px; margin-top:30px; flex-wrap:wrap}
+.hero__meta{
+  display:flex; gap:26px; margin-top:44px; padding-top:26px;
+  border-top:1px solid rgba(255,255,255,.14); flex-wrap:wrap;
+}
+.hero__meta div b{display:block; font-family:var(--display); font-size:25px; font-weight:600; color:var(--brass-hi); letter-spacing:-.02em}
+.hero__meta div span{font-size:12.5px; color:#8A93AC}
+
+/* the printing receipt */
+.printer{display:flex; justify-content:center; perspective:1400px}
+.printer__slot{
+  width:330px; height:16px; background:linear-gradient(#2B3558,#141B2D);
+  border-radius:5px 5px 0 0; box-shadow:0 -2px 0 #3A4569 inset, 0 8px 24px rgba(0,0,0,.5);
+  position:relative; z-index:3;
+}
+.printer__slot::after{
+  content:''; position:absolute; left:16px; right:16px; bottom:2px; height:3px;
+  background:#0A0F1E; border-radius:2px;
+}
+.receipt--hero{
+  width:300px; margin-top:-3px; transform:rotateX(3deg); transform-origin:top center;
+  animation:feed .9s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes feed{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
+.receipt--hero .ln{opacity:0; animation:ln .32s ease forwards}
+@keyframes ln{to{opacity:1}}
+
+/* ---------------- section frame ---------------- */
+.sec{padding:96px 30px}
+.sec__in{max-width:1180px; margin:0 auto}
+.sec__head{max-width:640px; margin-bottom:46px}
+.sec__head h2{margin:14px 0 14px}
+.sec--dark{background:var(--espresso); color:var(--cream)}
+.sec--dark .sec__head h2{color:#FFFFFF}
+.sec--dark .lede{color:#9AA3B8}
+.sec--paper{background:var(--paper-2)}
+
+/* ---------------- offline story ---------------- */
+.story{display:grid; grid-template-columns:repeat(3,1fr); gap:18px}
+.beat{
+  background:var(--bark); border:1px solid var(--slate); border-radius:var(--r-lg);
+  padding:26px 22px; position:relative; overflow:hidden;
+}
+.beat__n{
+  font-family:var(--mono); font-size:11px; letter-spacing:.16em; color:var(--brass);
+  display:block; margin-bottom:16px;
+}
+.beat h3{font-size:17px; font-weight:600; color:#FFFFFF; margin-bottom:8px; letter-spacing:-.01em}
+.beat p{font-size:14px; color:#9AA3B8; line-height:1.65}
+.beat__sig{
+  margin-top:20px; display:flex; align-items:center; gap:9px;
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+}
+.dot{width:7px; height:7px; border-radius:50%; display:inline-block}
+.dot--jade{background:#0E7C6B; box-shadow:0 0 0 4px rgba(14,124,107,.2)}
+.dot--rust{background:#D4483B; box-shadow:0 0 0 4px rgba(212,72,59,.2); animation:pulse 1.9s ease-in-out infinite}
+.dot--brass{background:var(--brass); box-shadow:0 0 0 4px rgba(196,146,46,.18)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+/* ---------------- verticals with photo slots ---------------- */
+.verts{display:grid; grid-template-columns:repeat(3,1fr); gap:20px}
+.vert{
+  border-radius:var(--r-xl); overflow:hidden; background:#fff;
+  border:1px solid var(--edge); box-shadow:var(--shadow-sm);
+  transition:transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s;
+}
+.vert:hover{transform:translateY(-4px); box-shadow:var(--shadow)}
+/* Photo slot: drop a file at assets/img/<name>.jpg and it replaces the art.
+   Until then the gradient below renders — never a broken image. */
+.vert__art{
+  height:186px; position:relative; background-size:cover; background-position:center;
+}
+.vert--rest .vert__art{background-image:var(--photo-restaurant, linear-gradient(150deg,#1F2A45,#8A6A1E 42%,#F2A93B))}
+.vert--groc .vert__art{background-image:var(--photo-grocery,    linear-gradient(150deg,#12302B,#0E7C6B 46%,#3EA894))}
+.vert--fuel .vert__art{background-image:var(--photo-fuel,       linear-gradient(150deg,#2A1620,#8A2F28 44%,#D4483B))}
+.vert__art::after{content:''; position:absolute; inset:0; background:linear-gradient(transparent 42%, rgba(21,17,9,.72))}
+.vert__art i{
+  position:absolute; left:20px; bottom:17px; z-index:2; font-size:19px; color:var(--brass-hi);
+}
+.vert__art b{
+  position:absolute; left:52px; bottom:15px; z-index:2; color:#fff;
+  font-family:var(--display); font-size:20px; font-weight:600; letter-spacing:-.015em;
+}
+.vert__body{padding:20px 22px 24px}
+.vert__body p{font-size:14px; color:var(--ink-2); line-height:1.66}
+.vert__list{list-style:none; margin-top:15px; display:flex; flex-direction:column; gap:8px}
+.vert__list li{font-size:13.5px; color:var(--ink-2); display:flex; gap:10px; align-items:flex-start}
+.vert__list i{color:var(--jade); font-size:11px; margin-top:5px}
+
+/* ---------------- ledger proof ---------------- */
+.proof{display:grid; grid-template-columns:1fr 1fr; gap:52px; align-items:center}
+.ledger{background:#fff; border:1px solid var(--edge); border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--shadow)}
+.ledger__head{padding:15px 20px; border-bottom:1px solid var(--edge); display:flex; align-items:center; gap:10px}
+.ledger__head b{font-size:14px; font-weight:600}
+
+/* ---------------- pricing ---------------- */
+.plans{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; align-items:start}
+.plan{background:#fff; border:1px solid var(--edge); border-radius:var(--r-xl); padding:26px 24px; position:relative}
+.plan--hero{border:1.5px solid var(--brass); box-shadow:0 20px 46px rgba(242,169,59,.18)}
+.plan__tag{
+  position:absolute; top:-11px; left:24px; background:var(--brass); color:#141B2D;
+  font-family:var(--mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase;
+  padding:4px 11px; border-radius:20px;
+}
+.plan h3{font-family:var(--mono); font-size:12.5px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted)}
+.plan__price{font-family:var(--display); font-size:38px; font-weight:600; letter-spacing:-.03em; margin:12px 0 3px}
+.plan__price sub{font-family:var(--sans); font-size:13px; font-weight:500; color:var(--muted); vertical-align:baseline}
+.plan ul{list-style:none; margin:20px 0 24px; display:flex; flex-direction:column; gap:11px}
+.plan li{font-size:14px; display:flex; gap:11px; align-items:flex-start; color:var(--ink-2)}
+.plan li i{color:var(--jade); font-size:11.5px; margin-top:5px}
+
+/* ---------------- cta + footer ---------------- */
+.cta{
+  background:var(--espresso); color:var(--cream); border-radius:var(--r-xl);
+  padding:56px 46px; text-align:center; position:relative; overflow:hidden;
+}
+.cta::before{
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(80% 120% at 50% 130%, rgba(242,169,59,.3), transparent 62%);
+}
+.cta > *{position:relative}
+.cta h2{color:#FFFFFF; margin-bottom:14px}
+.cta p{color:#9AA3B8; max-width:460px; margin:0 auto 28px}
+
+.foot{background:var(--espresso); color:#8A93AC; padding:40px 30px; border-top:1px solid var(--slate)}
+.foot__in{max-width:1180px; margin:0 auto; display:flex; gap:20px; align-items:center; flex-wrap:wrap; font-size:13.5px}
+.foot a{color:var(--cream-2)} .foot a:hover{color:var(--brass-hi)}
+
+@media(max-width:960px){
+  .hero__in,.proof{grid-template-columns:1fr; gap:44px}
+  .story,.verts,.plans{grid-template-columns:1fr}
+  .hero{padding:120px 20px 70px}
+  .sec{padding:66px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav" id="nav">
+  <span class="wordmark wordmark--light">ABC<span class="pos">POS</span></span>
+  <div class="nav__links">
+    <a href="#offline">Offline</a>
+    <a href="#verticals">Who it's for</a>
+    <a href="#books">Accounting</a>
+    <a href="#pricing">Pricing</a>
+    <a href="deck/">Guide</a>
+    <a class="btn btn--brass btn--sm" href="app/pos/">Try the till <i class="fa-solid fa-arrow-right"></i></a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero grain">
+  <div class="hero__in">
+    <div>
+      <span class="eyebrow eyebrow--light">Point of sale · United Arab Emirates</span>
+      <h1 class="display">Sell through <em>anything</em>.</h1>
+      <p class="lede">A till that keeps trading when the internet drops, receipts that carry your name, and books that close themselves. Built for restaurants, marts and petrol stations.</p>
+      <div class="hero__cta">
+        <a class="btn btn--brass btn--lg" href="app/pos/"><i class="fa-solid fa-cash-register"></i> Try the till</a>
+        <a class="btn btn--onDark btn--lg" href="app/dashboard/">See the dashboard</a>
+      </div>
+      <div class="hero__meta">
+        <div><b>0s</b><span>Downtime when wifi drops</span></div>
+        <div><b>90s</b><span>Price change reaches every till</span></div>
+        <div><b>5%</b><span>VAT posted automatically</span></div>
+      </div>
+    </div>
+
+    <!-- signature: a receipt that prints itself on load -->
+    <div class="printer">
+      <div>
+        <div class="printer__slot"></div>
+        <div class="receipt receipt--hero" id="rc">
+          <div class="receipt__c ln"><div class="receipt__biz">AL NOOR RESTAURANT</div></div>
+          <div class="receipt__c receipt__muted ln">Al Muntasir Rd · Ras Al Khaimah</div>
+          <div class="receipt__c receipt__muted ln">TRN 100234567800003</div>
+          <div class="receipt__rule ln"></div>
+          <div class="receipt__row ln"><span>#MAIN-0042</span><span>DINE-IN · T3</span></div>
+          <div class="receipt__rule ln"></div>
+          <div class="receipt__row ln"><span>2 × Chicken Tikka</span><span>64.00</span></div>
+          <div class="receipt__row ln"><span>4 × Butter Naan</span><span>20.00</span></div>
+          <div class="receipt__row ln"><span>2 × Karak Chai</span><span>8.00</span></div>
+          <div class="receipt__rule ln"></div>
+          <div class="receipt__row ln"><span>Subtotal</span><span>92.00</span></div>
+          <div class="receipt__row ln"><span>VAT 5%</span><span>4.60</span></div>
+          <div class="receipt__row receipt__total ln"><span>TOTAL</span><span>96.60</span></div>
+          <div class="receipt__rule ln"></div>
+          <div class="receipt__row ln"><span>CASH</span><span>100.00</span></div>
+          <div class="receipt__row ln"><span>Change</span><span>3.40</span></div>
+          <div class="receipt__qr ln"></div>
+          <div class="receipt__c receipt__muted ln" style="margin-top:8px">Shukran — please visit again</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ OFFLINE ============ -->
+<section class="sec sec--dark" id="offline">
+  <div class="sec__in">
+    <div class="sec__head">
+      <span class="eyebrow eyebrow--light">The part that matters</span>
+      <h2 class="display">The internet goes down. You keep selling.</h2>
+      <p class="lede">Most tills stop the moment the line drops. This one doesn't notice. Sales are written to the device first and sent up afterwards — so a bad connection costs you nothing.</p>
+    </div>
+    <div class="story">
+      <div class="beat">
+        <span class="beat__n">01</span>
+        <h3>The line drops</h3>
+        <p>The status turns red. Nothing else changes for the cashier — same screen, same buttons, same speed.</p>
+        <div class="beat__sig" style="color:#D4483B"><span class="dot dot--rust"></span> Offline</div>
+      </div>
+      <div class="beat">
+        <span class="beat__n">02</span>
+        <h3>Orders queue on the till</h3>
+        <p>Each sale is stored with its own fingerprint and the receipt still prints, because the template lives on the device.</p>
+        <div class="beat__sig" style="color:var(--brass)"><span class="dot dot--brass"></span> 3 waiting</div>
+      </div>
+      <div class="beat">
+        <span class="beat__n">03</span>
+        <h3>It catches up by itself</h3>
+        <p>When the line returns the queue empties in seconds. Nothing is entered twice — the server recognises what it already has.</p>
+        <div class="beat__sig" style="color:#0E7C6B"><span class="dot dot--jade"></span> Synced</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VERTICALS ============ -->
+<section class="sec" id="verticals">
+  <div class="sec__in">
+    <div class="sec__head">
+      <span class="eyebrow">One system</span>
+      <h2 class="display">Three counters, one platform.</h2>
+      <p class="lede">A restaurant taps a menu. A mart scans a barcode and weighs produce. A station reads a pump. Underneath it is the same till, the same books, the same dashboard.</p>
+    </div>
+    <div class="verts">
+      <article class="vert vert--rest">
+        <div class="vert__art"><i class="fa-solid fa-utensils"></i><b>Restaurants</b></div>
+        <div class="vert__body">
+          <p>Tables, order types and kitchen tickets, with modifiers that don't slow the queue down.</p>
+          <ul class="vert__list">
+            <li><i class="fa-solid fa-check"></i> Dine-in, takeaway and delivery</li>
+            <li><i class="fa-solid fa-check"></i> Table plan and open bills</li>
+            <li><i class="fa-solid fa-check"></i> Kitchen tickets to a second printer</li>
+          </ul>
+        </div>
+      </article>
+      <article class="vert vert--groc">
+        <div class="vert__art"><i class="fa-solid fa-basket-shopping"></i><b>Marts</b></div>
+        <div class="vert__body">
+          <p>Scan-first checkout with weighed produce, live stock and expiry dates you can act on.</p>
+          <ul class="vert__list">
+            <li><i class="fa-solid fa-check"></i> Barcode and pack-size codes</li>
+            <li><i class="fa-solid fa-check"></i> Price by weight from the scale</li>
+            <li><i class="fa-solid fa-check"></i> Low stock and expiry alerts</li>
+          </ul>
+        </div>
+      </article>
+      <article class="vert vert--fuel">
+        <div class="vert__art"><i class="fa-solid fa-gas-pump"></i><b>Stations</b></div>
+        <div class="vert__body">
+          <p>Pump readings reconciled against the shop till, so the shift closes on real numbers.</p>
+          <ul class="vert__list">
+            <li><i class="fa-solid fa-check"></i> Nozzle and tank dip readings</li>
+            <li><i class="fa-solid fa-check"></i> Shift close by meter</li>
+            <li><i class="fa-solid fa-check"></i> Forecourt shop on the same till</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BOOKS ============ -->
+<section class="sec sec--paper" id="books">
+  <div class="sec__in proof">
+    <div>
+      <span class="eyebrow">Accounting, not reporting</span>
+      <h2 class="display" style="margin:14px 0 16px">Your books write themselves.</h2>
+      <p class="lede">Most tills hand you a sales report and leave the accounting to someone else. Every sale here posts a real double-entry: cash to the drawer, VAT to what you owe, cost against stock.</p>
+      <p class="lede" style="margin-top:14px">Which means the trial balance on the right was not typed by anybody. It is just what the till did today.</p>
+      <a class="btn btn--ghost" href="app/dashboard/" style="margin-top:26px">Open the dashboard <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    <div class="ledger">
+      <div class="ledger__head">
+        <b>Trial balance</b>
+        <span class="chip chip--jade" style="margin-left:auto"><i class="fa-solid fa-check"></i> In balance</span>
+      </div>
+      <table class="tbl">
+        <thead><tr><th>Account</th><th class="num">Debit</th><th class="num">Credit</th></tr></thead>
+        <tbody id="tbBody"></tbody>
+        <tfoot id="tbFoot"></tfoot>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section class="sec" id="pricing">
+  <div class="sec__in">
+    <div class="sec__head">
+      <span class="eyebrow">Pricing</span>
+      <h2 class="display">Priced per counter, not per headache.</h2>
+      <p class="lede">Every plan includes offline selling, thermal receipts, the accounting ledger and the owner dashboard. No setup fee.</p>
+    </div>
+    <div class="plans">
+      <div class="plan">
+        <h3>Starter</h3>
+        <div class="plan__price">149<sub> / mo</sub></div>
+        <p class="small">One counter, one location</p>
+        <ul>
+          <li><i class="fa-solid fa-check"></i> 1 outlet, 2 devices</li>
+          <li><i class="fa-solid fa-check"></i> Offline selling and sync</li>
+          <li><i class="fa-solid fa-check"></i> Branded thermal receipts</li>
+          <li><i class="fa-solid fa-check"></i> Email support</li>
+        </ul>
+        <a class="btn btn--ghost" href="#contact" style="width:100%">Start free trial</a>
+      </div>
+      <div class="plan plan--hero">
+        <span class="plan__tag">Most chosen</span>
+        <h3>Growth</h3>
+        <div class="plan__price">349<sub> / mo</sub></div>
+        <p class="small">A few branches, one owner</p>
+        <ul>
+          <li><i class="fa-solid fa-check"></i> 3 outlets, 8 devices</li>
+          <li><i class="fa-solid fa-check"></i> Stock, suppliers and receiving</li>
+          <li><i class="fa-solid fa-check"></i> Multi-outlet dashboard</li>
+          <li><i class="fa-solid fa-check"></i> WhatsApp and phone support</li>
+        </ul>
+        <a class="btn btn--brass" href="#contact" style="width:100%">Start free trial</a>
+      </div>
+      <div class="plan">
+        <h3>Pro</h3>
+        <div class="plan__price">Talk<sub> to us</sub></div>
+        <p class="small">Chains and stations</p>
+        <ul>
+          <li><i class="fa-solid fa-check"></i> Unlimited outlets and devices</li>
+          <li><i class="fa-solid fa-check"></i> Fuel pumps and shift reconciliation</li>
+          <li><i class="fa-solid fa-check"></i> Your own domain</li>
+          <li><i class="fa-solid fa-check"></i> Priority support and onboarding</li>
+        </ul>
+        <a class="btn btn--ghost" href="#contact" style="width:100%">Book a call</a>
+      </div>
+    </div>
+    <p class="tiny" style="margin-top:18px">Prices shown in AED, excluding VAT.</p>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="sec" id="contact" style="padding-top:0">
+  <div class="sec__in">
+    <div class="cta grain">
+      <h2 class="display">See it lose the internet.</h2>
+      <p>The demo runs in your browser. Ring up an order, pull the plug, and watch it keep going.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a class="btn btn--brass btn--lg" href="app/pos/"><i class="fa-solid fa-cash-register"></i> Open the till</a>
+        <a class="btn btn--onDark btn--lg" href="mailto:hello@bytecraft.live">Book a demo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="foot__in">
+    <span class="wordmark wordmark--light" style="font-size:17px">ABC<span class="pos">POS</span></span>
+    <span>by ByteCraft</span>
+    <span style="flex:1"></span>
+    <a href="https://bytecraft.live">bytecraft.live</a>
+    <a href="mailto:hello@bytecraft.live">hello@bytecraft.live</a>
+  </div>
+</footer>
+
+<script src="assets/js/data.js"></script>
+<script>
+/* nav shadow on scroll */
+const nav = document.getElementById('nav');
+addEventListener('scroll', () => nav.classList.toggle('is-stuck', scrollY > 20), {passive:true});
+
+/* stagger the receipt lines so it reads as printing */
+$$('#rc .ln').forEach((el,i) => el.style.animationDelay = (0.28 + i*0.055) + 's');
+
+/* trial balance rendered from the same data the dashboard uses */
+const t = totals(DAYS);
+const rows = trialBalance(t);
+$('#tbBody').innerHTML = rows.map(r => `
+  <tr>
+    <td><span class="fig small" style="color:var(--muted)">${r.code}</span> &nbsp;${r.name}</td>
+    <td class="num">${r.dr ? money(r.dr) : '—'}</td>
+    <td class="num">${r.cr ? money(r.cr) : '—'}</td>
+  </tr>`).join('');
+const dr = rows.reduce((a,r)=>a+r.dr,0), cr = rows.reduce((a,r)=>a+r.cr,0);
+$('#tbFoot').innerHTML = `<tr><td>Total</td><td class="num">${money(dr)}</td><td class="num">${money(cr)}</td></tr>`;
+</script>
+</body>
+</html>
